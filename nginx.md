@@ -9,16 +9,16 @@ https://github.com/Webdjan/ubuntu/blob/master/ssh-user.md
 
 1.	Обновляем локальный индекс пакетов
 2.	Установка Nginx со всеми зависимостями
-3.  Список конфигураций брандмауэра
-4.  Разрешаем трафик через порт 80
-5.  Проверяем изменения
+3.      Список конфигураций брандмауэра
+4.      Разрешаем трафик через порт 80
+5.      Проверяем изменения
 
 ```txt
 1)	sudo apt update
 2)	sudo apt install nginx
 3)	sudo ufw app list
-4)  sudo ufw allow 'Nginx HTTP'
-5)  sudo ufw status
+4)      sudo ufw allow 'Nginx HTTP'
+5)      sudo ufw status
 ```
 
 ### Управление
