@@ -12,5 +12,8 @@ https://github.com/Webdjan/ubuntu/blob/master/nginx.md
 3) Получение сертификата SSL для работы https
 https://github.com/Webdjan/ubuntu/blob/master/ssl-nginx.md
 
-4) Подготавливается инфо далее будет - gunicorn, django, postgres
+4) Установка и настройка - gunicorn, django, postgres
+https://github.com/Webdjan/ubuntu/blob/master/ginicorn-django-postgres.md
+
+5) подготавливается
 ```
