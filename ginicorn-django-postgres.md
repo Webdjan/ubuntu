@@ -98,7 +98,7 @@ After=network.target
 User=neyton
 Group=www-data
 WorkingDirectory=/home/neyton/myprojectdir
-ExecStart=/home/neyton/myprojectenv/bin/gunicorn \
+ExecStart=/home/neyton/myprojectdir/myprojectenv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
           --bind unix:/run/gunicorn.sock \
