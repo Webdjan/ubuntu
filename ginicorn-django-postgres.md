@@ -237,16 +237,16 @@ http {
 
 	client_body_timeout 10;
 	client_max_body_size 1m;
- types_hash_max_size 2048;
+        types_hash_max_size 2048;
 	server_tokens off;
 	include /etc/nginx/mime.types;
 	default_type application/octet-stream;
 
 	server_names_hash_bucket_size 64;
- client_body_buffer_size 16k;
- client_header_buffer_size 1k;
- large_client_header_buffers 2 1k;
- limit_conn_zone $binary_remote_addr zone=perip:6m;
+        client_body_buffer_size 16k;
+        client_header_buffer_size 1k;
+        large_client_header_buffers 2 1k;
+        limit_conn_zone $binary_remote_addr zone=perip:6m;
 	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
 	ssl_prefer_server_ciphers on;
 	access_log /var/log/nginx/access.log;
