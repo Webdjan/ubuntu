@@ -132,40 +132,28 @@ sudo systemctl status gunicorn
 server {
     listen [::]:80;
     listen 80;
-
     server_name mydomen.ru www.mydomen.ru;
-    
-    # redirect http to https www
     return 301 https://mydomen.ru$request_uri;
 }
 
 server {
     listen [::]:443 ssl http2;
     listen 443 ssl http2;
-
     server_name www.mydomen.ru;
-
     ssl_certificate /etc/letsencrypt/live/mydomen.ru/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mydomen.ru/privkey.pem;
-    
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
     root /home/neyton/myprojectdir;
-
-    # redirect https non-www to https www
     return 301 https://mydomen.ru$request_uri;
 }
 
 server {
     listen [::]:443 ssl http2;
     listen 443 ssl http2;
-
     server_name mydomen.ru;
-
     ssl_certificate /etc/letsencrypt/live/mydomen.ru/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/mydomen.ru/privkey.pem;
-
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
@@ -176,55 +164,106 @@ server {
 
     location /static/ {
         root /home/neyton/myprojectdir;
+        expires 30d;
     }
 
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
+        root /home/neyton/myprojectdir;
+        expires 30d;
+    }
+ 
+
     location / {
+
+        proxy_connect_timeout 5;
+        proxy_send_timeout 8;
+        proxy_read_timeout 8;
+        proxy_temp_file_write_size 64k;
+        proxy_buffer_size 4k;
+        proxy_buffers 32 16k;
+        proxy_busy_buffers_size 32k;
+        proxy_cache_valid 1h;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_headers_hash_max_size 512;
         proxy_headers_hash_bucket_size 128;
+
+
+        limit_conn perip 5;	
         proxy_redirect off;
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
 
         add_header Content-Security-Policy "img-src * 'self' data: blob: https:; default-src 'self' https://*.googleapis.com https://*.googletagmanager.com https://*.google-analytics.com https://s.ytimg.com https://www.youtube.com https://mydomen.ru https://*.googleapis.com https://*.gstatic.com https://*.w.org data: 'unsafe-inline' 'unsafe-eval';" always;
-     add_header X-Xss-Protection "1; mode=block" always;
-        add_header X-Frame-Options "SAMEORIGIN" always;
+	       add_header X-Xss-Protection "1; mode=block" always;
+        add_header x-frame-options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
-        add_header Access-Control-Allow-Origin "https://mydomen.ru";
+        add_header Access-Control-Allow-Origin "https://seorif.ru";
         add_header Referrer-Policy "origin-when-cross-origin" always;
         add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
+
+        add_header Feature-Policy "accelerometer 'none';ambient-light-sensor 'none';autoplay 'none';camera 'none';encrypted-media 'none';fullscreen 'self';geolocation 'self';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'self';picture-in-picture 'none';speaker 'self';sync-xhr 'none';usb 'none';vibrate 'none';vr 'none';";   
     }
 }
 ```
 
 
-```text
-sudo nginx -t
-sudo service nginx restart
-```
 
-> Переходим на сайт и видим экран приветствия
-
-
-### Дополнительно:
+### Заменяем все что в дефолте:
 
 
 > sudo nano /etc/nginx/nginx.conf
 
 ```text
-        include /etc/nginx/mime.types;            (эта строка уже будет)
-        default_type application/octet-stream;    (эта строка уже будет)
-                     
-           ниже добавить:
+user www-data;
+worker_processes auto;
+worker_rlimit_nofile 3072;
+pcre_jit on;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
 
-        client_body_buffer_size 16k;
-        client_header_buffer_size 1k;
-        client_max_body_size 8m;
-        large_client_header_buffers 2 1k;
-        server_tokens off;
+events {
+	worker_connections 1024;
+}
+
+http {
+ sendfile on;
+	tcp_nopush on;
+	tcp_nodelay on;
+	reset_timedout_connection on;
+	keepalive_timeout 40;
+	keepalive_requests 80;
+	send_timeout 2;
+
+	client_body_timeout 10;
+	client_max_body_size 1m;
+ types_hash_max_size 2048;
+	server_tokens off;
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	server_names_hash_bucket_size 64;
+ client_body_buffer_size 16k;
+ client_header_buffer_size 1k;
+ large_client_header_buffers 2 1k;
+ limit_conn_zone $binary_remote_addr zone=perip:6m;
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
 
 
+	gzip on;
+	gzip_static on;
+	gzip_vary on;
+	gzip_proxied any;
+	gzip_comp_level 6;
+	gzip_min_length 1000;
+	gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss    text/javascript;
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
 ```
 
 ```text
@@ -235,6 +274,11 @@ sudo systemctl restart gunicorn    (перезапуск гуникорн)
 ```
 
 ```text
-Можно было и не тут указывать, но пока так. Ограничил размер буфера и скрыл подробности nginx (в ответе браузера видно)
-Все проверил, все работает если что не так пишите. В файле выше там всего дофига, опишу подробно когда картина в целом прорисуется.
+Все работает, проверил, но не знаю все ли правильно сделал
+
+
+Проферяем всё с помощью сервисов:
+https://securityheaders.com/
+https://www.webpagetest.org/
 ```
+
