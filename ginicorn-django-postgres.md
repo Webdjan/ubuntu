@@ -194,12 +194,13 @@ server {
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
 
-        add_header Content-Security-Policy "img-src * 'self' data: blob: https:; default-src 'self' https://*.googleapis.com https://*.googletagmanager.com https://*.google-analytics.com https://s.ytimg.com https://www.youtube.com https://mydomen.ru https://*.googleapis.com https://*.gstatic.com https://*.w.org data: 'unsafe-inline' 'unsafe-eval';" always;
-	       add_header X-Xss-Protection "1; mode=block" always;
+        add_header Content-Security-Policy "script-src 'self'; object-src 'self'";
+        add_header X-Xss-Protection "1; mode=block" always;
         add_header x-frame-options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
         add_header Access-Control-Allow-Origin "https://mydomen.ru";
-        add_header Referrer-Policy "origin-when-cross-origin" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin";
+
         add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
 
         add_header Feature-Policy "accelerometer 'none';ambient-light-sensor 'none';autoplay 'none';camera 'none';encrypted-media 'none';fullscreen 'self';geolocation 'self';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'self';picture-in-picture 'none';speaker 'self';sync-xhr 'none';usb 'none';vibrate 'none';vr 'none';";   
