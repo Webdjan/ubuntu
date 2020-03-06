@@ -198,7 +198,7 @@ server {
 	       add_header X-Xss-Protection "1; mode=block" always;
         add_header x-frame-options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
-        add_header Access-Control-Allow-Origin "https://seorif.ru";
+        add_header Access-Control-Allow-Origin "https://mydomen.ru";
         add_header Referrer-Policy "origin-when-cross-origin" always;
         add_header Strict-Transport-Security "max-age=31536000; includeSubdomains; preload";
 
