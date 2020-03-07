@@ -278,7 +278,7 @@ sudo systemctl restart gunicorn    (перезапуск гуникорн)
 Все работает, проверил, но не знаю все ли правильно сделал
 
 
-Проферяем всё с помощью сервисов:
+Проверяем всё с помощью сервисов:
 https://securityheaders.com/
 https://www.webpagetest.org/
 ```
